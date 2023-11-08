@@ -1,0 +1,25 @@
+{
+  "random-number": [1337],
+  "products": [
+    {
+      "id": 1,
+      "name": "Computador",
+      "description": "PC gamer de última geração"
+    },
+    {
+      "id": 2,
+      "name": "Tablet",
+      "description": "Tablet gamer de segunda geração"
+    },
+    {
+      "id": 3,
+      "name": "Monitor",
+      "description": "Monitor gamer com LED"
+    },
+    {
+      "id": 4,
+      "name": "PlayStation 5",
+      "description": "Vídeo game de última geração"
+    }
+  ]
+}

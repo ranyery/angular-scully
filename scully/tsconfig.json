@@ -1,0 +1,18 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "importHelpers": false,
+    "lib": ["ES2019", "DOM"],
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "sourceMap": false,
+    "target": "es2018",
+    "types": ["node"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "typeRoots": ["../node_modules/@types"],
+    "allowSyntheticDefaultImports": true
+  },
+  "exclude": ["./**/*spec.ts"]
+}
