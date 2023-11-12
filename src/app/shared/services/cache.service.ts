@@ -1,5 +1,6 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
+import { cloneDeep } from 'lodash';
 
 interface ICachedData<T> {
   data: T;
@@ -8,7 +9,9 @@ interface ICachedData<T> {
 
 @Injectable({ providedIn: 'root' })
 export class CacheService {
-  private readonly _transferState = inject(TransferState);
+  private readonly _keys = new Set<string>();
+
+  constructor(private _transferState: TransferState) {}
 
   public get<T>(key: string): T | undefined {
     if (this.isEmpty) return;
@@ -22,7 +25,7 @@ export class CacheService {
 
     const { data, expireOn } = cachedData;
     if (!expireOn || expireOn > Date.now()) {
-      return data;
+      return cloneDeep(data);
     } else {
       this.remove(key);
       return undefined;
@@ -36,9 +39,11 @@ export class CacheService {
     }
 
     this._transferState.set(makeStateKey<ICachedData<T>>(key), {
-      data,
+      data: cloneDeep(data),
       expireOn: expirationTimestamp,
     });
+
+    this._keys.add(key);
   }
 
   public remove(key: string): void {
@@ -50,6 +55,12 @@ export class CacheService {
   }
 
   public get isEmpty(): boolean {
-    return this._transferState.isEmpty;
+    return this._keys.size === 0;
+  }
+
+  public clear(): void {
+    if (this.isEmpty) return;
+
+    this._keys.forEach((key) => this.remove(key));
   }
 }

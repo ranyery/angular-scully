@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { CacheKeys } from 'src/app/shared/constants/cache-keys.enum';
 import { FetchAndCacheService } from 'src/app/shared/services/fetch-and-cache.service';
 
 import { IProduct } from '../components/product-card/product-card.component';
@@ -10,14 +11,14 @@ import { IProduct } from '../components/product-card/product-card.component';
 })
 export class ProductsService {
   private readonly _baseUrl = 'http://localhost:3000/products';
-  private readonly _fetchAndCacheService = inject(FetchAndCacheService);
 
-  constructor(private _httpClient: HttpClient) {}
+  constructor(
+    private _httpClient: HttpClient,
+    private _fetchAndCacheService: FetchAndCacheService
+  ) {}
 
   public getAll(): Observable<IProduct[]> {
-    return this._fetchAndCacheService.get(
-      'products',
-      this._httpClient.get<IProduct[]>(this._baseUrl)
-    );
+    const observable = this._httpClient.get<IProduct[]>(this._baseUrl);
+    return this._fetchAndCacheService.get(CacheKeys.PRODUCTS, observable);
   }
 }

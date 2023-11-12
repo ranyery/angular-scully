@@ -1,11 +1,13 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import {
   isScullyGenerated,
   isScullyRunning,
   TransferStateService,
 } from '@scullyio/ng-lib';
-import { Observable, of, retry, tap } from 'rxjs';
+import { catchError, Observable, of, retry, tap } from 'rxjs';
 
+import { CacheKeys } from '../constants/cache-keys.enum';
 import { CacheService } from './cache.service';
 
 @Injectable({ providedIn: 'root' })
@@ -13,10 +15,8 @@ export class FetchAndCacheService {
   private readonly _cacheService = inject(CacheService);
   private readonly _scullyTransferStateService = inject(TransferStateService);
 
-  private readonly _retryConfig = { count: 2, delay: 200 };
-
   public get<T>(
-    key: string,
+    key: CacheKeys,
     observable: Observable<T>,
     secondsToExpire?: number
   ): Observable<T> {
@@ -24,7 +24,7 @@ export class FetchAndCacheService {
     if (isScullyRunning() || isScullyGenerated()) {
       return this._scullyTransferStateService.useScullyTransferState(
         key,
-        observable.pipe(retry(this._retryConfig))
+        observable.pipe(retry({ count: 2, delay: 500 }))
       );
     }
 
@@ -36,9 +36,10 @@ export class FetchAndCacheService {
     }
 
     return observable.pipe(
-      retry(this._retryConfig),
-      tap((response) => {
-        this._cacheService.set(key, response, secondsToExpire);
+      tap((response) => this._cacheService.set(key, response, secondsToExpire)),
+      catchError((_httpError: HttpErrorResponse) => {
+        this._cacheService.remove(key);
+        throw _httpError;
       })
     );
   }
